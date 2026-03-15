@@ -9,6 +9,11 @@ import io
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/")
+def home():
+    return "Backend is live!"
+
+
 @app.route("/jobs", methods=["GET", "POST"])
 def get_jobs():
 
