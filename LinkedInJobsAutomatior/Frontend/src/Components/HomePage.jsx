@@ -18,7 +18,7 @@ const saveReport = async () => {
 
   try {
 
-    const res = await fetch("http://127.0.0.1:5000/save-report", {
+    const res = await fetch("https://linkedinautomation-app-backend.onrender.com/save-report", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -55,7 +55,7 @@ const saveReport = async () => {
 
     try {
 
-      const res = await fetch("http://127.0.0.1:5000/jobs", {
+      const res = await fetch("https://linkedinautomation-app-backend.onrender.com/jobs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -87,7 +87,7 @@ const saveReport = async () => {
 
   const markApplied = async (jobId, index) => {
 
-    await fetch(`http://127.0.0.1:5000/apply/${jobId}`, {
+    await fetch(`https://linkedinautomation-app-backend.onrender.com/apply/${jobId}`, {
       method: "POST"
     });
 
