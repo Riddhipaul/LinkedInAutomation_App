@@ -97,6 +97,6 @@ def scrape_jobs(keyword="GenAI Developer",
                 "title": "Scraper Failed",
                 "company": "LinkedIn",
                 "location": location,
-                "link": "",
+                "link": e,
                 "applied": False
             }]
