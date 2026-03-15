@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+from urllib.parse import quote
 
 
 def scrape_jobs(keyword="GenAI Developer",
@@ -9,6 +10,10 @@ def scrape_jobs(keyword="GenAI Developer",
     jobs = []
 
     print("Values:", keyword, location, experience, timeframe)
+
+    # Encode URL parameters
+    keyword = quote(keyword)
+    location = quote(location)
 
     # Experience mapping
     exp_map = {
@@ -27,25 +32,36 @@ def scrape_jobs(keyword="GenAI Developer",
 
     base_url = f"https://www.linkedin.com/jobs/search/?keywords={keyword}&location={location}"
 
-    # Add experience filter if provided
     if experience:
         exp_filter = exp_map.get(experience.lower())
         if exp_filter:
             base_url += f"&f_E={exp_filter}"
 
-    # Add timeframe filter if provided
     if timeframe:
         time_filter = time_map.get(timeframe.lower())
         if time_filter:
             base_url += f"&f_TPR={time_filter}"
 
+    print("LinkedIn URL:", base_url)
+
     with sync_playwright() as p:
         try:
-            browser = p.chromium.launch(headless=True)
+
+            browser = p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage"
+                ]
+            )
+
             page = browser.new_page()
 
-            page.goto(base_url)
-            page.wait_for_timeout(5000)
+            page.goto(base_url, timeout=60000)
+
+            # wait for jobs to load
+            page.wait_for_selector(".base-card", timeout=15000)
 
             job_cards = page.query_selector_all(".base-card")
 
@@ -65,12 +81,22 @@ def scrape_jobs(keyword="GenAI Developer",
                     "link": link,
                     "location": location,
                     "experience_level": experience,
-                    "timeframe": timeframe
+                    "timeframe": timeframe,
+                    "applied": False
                 })
 
             browser.close()
 
             return jobs
+
         except Exception as e:
             print("Scraping failed:", e)
-            return [{"title": "Dummy Job", "company": "Test Corp", "location": "Remote"}]
+
+            # fallback response
+            return [{
+                "title": "Scraper Failed",
+                "company": "LinkedIn",
+                "location": location,
+                "link": "",
+                "applied": False
+            }]
